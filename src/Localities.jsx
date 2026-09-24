@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import Modal from './Modal';
 import Pagination from './Pagination';
+import DataTable from './DataTable';
+import AsyncSelect from './AsyncSelect';
 
 const empty = { name: '', pincode: '', city: '', landlordId: '' };
 const PAGE_SIZE = 10;
 
-export default function Localities({ localities, landlords, onAdd, onDelete }) {
+export default function Localities({ localities, landlords, onAdd, onUpdate, onDelete }) {
   const [form, setForm] = useState(empty);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(localities.length / PAGE_SIZE));
@@ -18,12 +21,34 @@ export default function Localities({ localities, landlords, onAdd, onDelete }) {
 
   const close = () => {
     setOpen(false);
+    setEditingId(null);
     setForm(empty);
+  };
+
+  const openAdd = () => {
+    setEditingId(null);
+    setForm(empty);
+    setOpen(true);
+  };
+
+  const openEdit = (locality) => {
+    setEditingId(locality.id);
+    setForm({
+      name: locality.name,
+      pincode: locality.pincode,
+      city: locality.city,
+      landlordId: locality.landlordId,
+    });
+    setOpen(true);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(form);
+    if (editingId) {
+      onUpdate(editingId, form);
+    } else {
+      onAdd(form);
+    }
     close();
   };
 
@@ -32,51 +57,59 @@ export default function Localities({ localities, landlords, onAdd, onDelete }) {
     return l ? `${l.firstName} ${l.lastName}` : '';
   };
 
+  const columns = [
+    { key: 'name', header: 'Name' },
+    { key: 'pincode', header: 'Pincode' },
+    { key: 'city', header: 'City' },
+    { key: 'landlord', header: 'Landlord', render: (l) => landlordName(l.landlordId) },
+  ];
+
+  const landlordOptions = landlords.map((l) => ({ value: l.id, label: `${l.firstName} ${l.lastName}` }));
+
   return (
     <>
       <div className="page-header">
         <h1>Localities</h1>
-        <button className="btn btn-primary" onClick={() => setOpen(true)}>+ Add locality</button>
+        <button className="btn btn-primary" onClick={openAdd}>+ Add locality</button>
       </div>
       <div className="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Pincode</th>
-              <th>City</th>
-              <th>Landlord</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr><td colSpan={5} className="empty">No localities yet.</td></tr>
-            ) : (
-              rows.map((l) => (
-                <tr key={l.id}>
-                  <td>{l.name}</td>
-                  <td>{l.pincode}</td>
-                  <td>{l.city}</td>
-                  <td>{landlordName(l.landlordId)}</td>
-                  <td><button className="btn btn-danger" onClick={() => onDelete(l.id)}>Delete</button></td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          rowKey={(l) => l.id}
+          emptyMessage="No localities yet."
+          renderActions={(l) => (
+            <>
+              <button className="btn btn-secondary" onClick={() => openEdit(l)}>Edit</button>{' '}
+              <button className="btn btn-danger" onClick={() => onDelete(l.id)}>Delete</button>
+            </>
+          )}
+        />
       </div>
       <Pagination page={current} totalPages={totalPages} onChange={setPage} />
 
       {open && (
-        <Modal title="New locality" submitLabel="Add locality" onClose={close} onSubmit={handleSubmit}>
+        <Modal
+          title={editingId ? 'Edit locality' : 'New locality'}
+          submitLabel={editingId ? 'Save changes' : 'Add locality'}
+          onClose={close}
+          onSubmit={handleSubmit}
+        >
           <div className="field">
             <label htmlFor="name">Name</label>
             <input id="name" name="name" value={form.name} onChange={handleChange} required />
           </div>
           <div className="field">
             <label htmlFor="pincode">Pincode</label>
-            <input id="pincode" name="pincode" value={form.pincode} onChange={handleChange} required />
+            <input
+              id="pincode"
+              name="pincode"
+              value={form.pincode}
+              onChange={handleChange}
+              pattern="^\d{6}$"
+              title="Pincode must be exactly 6 digits"
+              required
+            />
           </div>
           <div className="field">
             <label htmlFor="city">City</label>
@@ -84,12 +117,15 @@ export default function Localities({ localities, landlords, onAdd, onDelete }) {
           </div>
           <div className="field">
             <label htmlFor="landlordId">Landlord</label>
-            <select id="landlordId" name="landlordId" value={form.landlordId} onChange={handleChange} required>
-              <option value="">Select a landlord</option>
-              {landlords.map((l) => (
-                <option key={l.id} value={l.id}>{l.firstName} {l.lastName}</option>
-              ))}
-            </select>
+            <AsyncSelect
+              id="landlordId"
+              name="landlordId"
+              value={form.landlordId}
+              onChange={handleChange}
+              options={landlordOptions}
+              placeholder="Select a landlord"
+              required
+            />
           </div>
         </Modal>
       )}
