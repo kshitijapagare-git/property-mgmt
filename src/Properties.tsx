@@ -4,6 +4,8 @@ import Modal from './Modal';
 import Pagination from './Pagination';
 import DataTable from './DataTable';
 import AsyncSelect from './AsyncSelect';
+import TreeSelect from './TreeSelect';
+import type { TreeSelectOption } from './TreeSelect';
 import Stepper from './Stepper';
 import Slider from './Slider';
 import ToggleGroup from './ToggleGroup';
@@ -67,8 +69,7 @@ export default function Properties({
   const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, title: e.target.value });
 
-  const handleLocalityChange = (e: ChangeEvent<HTMLSelectElement>) =>
-    setForm({ ...form, localityId: e.target.value });
+  const handleLocalityChange = (value: string) => setForm({ ...form, localityId: value });
 
   const handlePropertyTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
     setForm({ ...form, propertyTypeId: e.target.value });
@@ -151,9 +152,11 @@ export default function Properties({
     { key: 'builtOn', header: 'Built on' },
   ];
 
-  const localityOptions: SelectOption[] = localities.map((l) => ({
+  const localityOptions: TreeSelectOption[] = localities.map((l) => ({
     value: l.id,
     label: l.name,
+    city: l.city,
+    zone: l.zone,
   }));
 
   const propertyTypeOptions: SelectOption[] = propertyTypes.map((pt) => ({
@@ -196,7 +199,7 @@ export default function Properties({
           </div>
           <div className="field">
             <label htmlFor="localityId">Locality</label>
-            <AsyncSelect
+            <TreeSelect
               id="localityId"
               name="localityId"
               value={form.localityId}
