@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Landlords from './Landlords';
 import Localities from './Localities';
+import { getLandlordDeleteBlockMessage } from './utils/landlordDeleteGuard';
 
 const routes = [
   { path: '#/landlords', label: 'Landlords', icon: '👤' },
@@ -21,9 +22,13 @@ export default function App() {
   const addLandlord = (landlord) =>
     setLandlords((prev) => [...prev, { ...landlord, id: crypto.randomUUID() }]);
 
+  const updateLandlord = (id, landlord) =>
+    setLandlords((prev) => prev.map((l) => (l.id === id ? { ...l, ...landlord } : l)));
+
   const deleteLandlord = (id) => {
-    if (localities.some((l) => l.landlordId === id)) {
-      alert('Cannot delete: landlord has localities.');
+    const message = getLandlordDeleteBlockMessage(id, localities);
+    if (message) {
+      alert(message);
       return;
     }
     setLandlords((prev) => prev.filter((l) => l.id !== id));
@@ -31,6 +36,9 @@ export default function App() {
 
   const addLocality = (locality) =>
     setLocalities((prev) => [...prev, { ...locality, id: crypto.randomUUID() }]);
+
+  const updateLocality = (id, locality) =>
+    setLocalities((prev) => prev.map((l) => (l.id === id ? { ...l, ...locality } : l)));
 
   const deleteLocality = (id) =>
     setLocalities((prev) => prev.filter((l) => l.id !== id));
@@ -52,10 +60,16 @@ export default function App() {
             localities={localities}
             landlords={landlords}
             onAdd={addLocality}
+            onUpdate={updateLocality}
             onDelete={deleteLocality}
           />
         ) : (
-          <Landlords landlords={landlords} onAdd={addLandlord} onDelete={deleteLandlord} />
+          <Landlords
+            landlords={landlords}
+            onAdd={addLandlord}
+            onUpdate={updateLandlord}
+            onDelete={deleteLandlord}
+          />
         )}
       </main>
     </div>
