@@ -39,7 +39,8 @@ describe('AsyncSelect', () => {
   });
 
   it('calls onChange with the selected option value', () => {
-    const handleChange = vi.fn();
+    // Capture target fields during the event: the controlled select resets its value right after.
+    const handleChange = vi.fn((e) => ({ name: e.target.name, value: e.target.value }));
     render(
       <AsyncSelect
         id="landlordId"
@@ -53,9 +54,7 @@ describe('AsyncSelect', () => {
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'l2' } });
 
     expect(handleChange).toHaveBeenCalledTimes(1);
-    const event = handleChange.mock.calls[0][0];
-    expect(event.target.name).toBe('landlordId');
-    expect(event.target.value).toBe('l2');
+    expect(handleChange.mock.results[0].value).toEqual({ name: 'landlordId', value: 'l2' });
   });
 
   it('shows a disabled loading option when isLoading is true', () => {
