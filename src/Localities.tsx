@@ -1,23 +1,42 @@
 import { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import Modal from './Modal';
 import Pagination from './Pagination';
 import DataTable from './DataTable';
 import AsyncSelect from './AsyncSelect';
+import type { Column, Landlord, Locality, LocalityFormValues, SelectOption } from './types';
 
-const empty = { name: '', pincode: '', city: '', landlordId: '' };
+const empty: LocalityFormValues = { name: '', pincode: '', city: '', landlordId: '' };
 const PAGE_SIZE = 10;
 
-export default function Localities({ localities, landlords, onAdd, onUpdate, onDelete }) {
-  const [form, setForm] = useState(empty);
+interface LocalitiesProps {
+  localities: Locality[];
+  landlords: Landlord[];
+  onAdd: (locality: LocalityFormValues) => void;
+  onUpdate: (id: string, locality: LocalityFormValues) => void;
+  onDelete: (id: string) => void;
+}
+
+export default function Localities({
+  localities,
+  landlords,
+  onAdd,
+  onUpdate,
+  onDelete,
+}: LocalitiesProps) {
+  const [form, setForm] = useState<LocalityFormValues>(empty);
   const [open, setOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(localities.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const rows = localities.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  // One handler serves both the text inputs and the landlord <select>, so the event has to
+  // cover either element — the body only touches `name` and `value`, which both share.
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const close = () => {
     setOpen(false);
@@ -31,7 +50,7 @@ export default function Localities({ localities, landlords, onAdd, onUpdate, onD
     setOpen(true);
   };
 
-  const openEdit = (locality) => {
+  const openEdit = (locality: Locality) => {
     setEditingId(locality.id);
     setForm({
       name: locality.name,
@@ -42,7 +61,7 @@ export default function Localities({ localities, landlords, onAdd, onUpdate, onD
     setOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (editingId) {
       onUpdate(editingId, form);
@@ -52,19 +71,22 @@ export default function Localities({ localities, landlords, onAdd, onUpdate, onD
     close();
   };
 
-  const landlordName = (id) => {
+  const landlordName = (id: string) => {
     const l = landlords.find((x) => x.id === id);
     return l ? `${l.firstName} ${l.lastName}` : '';
   };
 
-  const columns = [
+  const columns: Column<Locality>[] = [
     { key: 'name', header: 'Name' },
     { key: 'pincode', header: 'Pincode' },
     { key: 'city', header: 'City' },
     { key: 'landlord', header: 'Landlord', render: (l) => landlordName(l.landlordId) },
   ];
 
-  const landlordOptions = landlords.map((l) => ({ value: l.id, label: `${l.firstName} ${l.lastName}` }));
+  const landlordOptions: SelectOption[] = landlords.map((l) => ({
+    value: l.id,
+    label: `${l.firstName} ${l.lastName}`,
+  }));
 
   return (
     <>

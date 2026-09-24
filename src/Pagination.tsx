@@ -1,4 +1,10 @@
-export default function Pagination({ page, totalPages, onChange }) {
+interface PaginationProps {
+  page: number;
+  totalPages: number;
+  onChange: (page: number) => void;
+}
+
+export default function Pagination({ page, totalPages, onChange }: PaginationProps) {
   return (
     <div className="pagination">
       <span>Page {page}</span>

@@ -1,4 +1,21 @@
-export default function DataTable({ columns, rows, rowKey, emptyMessage, renderActions }) {
+import type { ReactNode } from 'react';
+import type { Column } from './types';
+
+interface DataTableProps<T> {
+  columns: Column<T>[];
+  rows: T[];
+  rowKey: (row: T) => string;
+  emptyMessage: string;
+  renderActions?: (row: T) => ReactNode;
+}
+
+export default function DataTable<T extends object>({
+  columns,
+  rows,
+  rowKey,
+  emptyMessage,
+  renderActions,
+}: DataTableProps<T>) {
   return (
     <div className="card">
       <table>
@@ -21,7 +38,10 @@ export default function DataTable({ columns, rows, rowKey, emptyMessage, renderA
             rows.map((row) => (
               <tr key={rowKey(row)}>
                 {columns.map((col) => (
-                  <td key={col.key}>{col.render ? col.render(row) : row[col.key]}</td>
+                  // A column without `render` reads the field named by `key` straight off the
+                  // row, exactly as before. `key` is a plain string (see Column in types.ts),
+                  // so the lookup needs the cast; the value is a rendered field either way.
+                  <td key={col.key}>{col.render ? col.render(row) : (row[col.key as keyof T] as ReactNode)}</td>
                 ))}
                 {renderActions && <td>{renderActions(row)}</td>}
               </tr>

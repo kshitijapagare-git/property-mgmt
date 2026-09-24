@@ -1,4 +1,14 @@
-export default function Modal({ title, submitLabel, onClose, onSubmit, children }) {
+import type { FormEventHandler, ReactNode } from 'react';
+
+interface ModalProps {
+  title: string;
+  submitLabel: string;
+  onClose: () => void;
+  onSubmit: FormEventHandler<HTMLFormElement>;
+  children: ReactNode;
+}
+
+export default function Modal({ title, submitLabel, onClose, onSubmit, children }: ModalProps) {
   return (
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>

@@ -1,3 +1,17 @@
+import type { ChangeEventHandler } from 'react';
+import type { SelectOption } from './types';
+
+interface AsyncSelectProps {
+  id: string;
+  name: string;
+  value: string;
+  onChange: ChangeEventHandler<HTMLSelectElement>;
+  options: SelectOption[];
+  placeholder?: string;
+  isLoading?: boolean;
+  required?: boolean;
+}
+
 export default function AsyncSelect({
   id,
   name,
@@ -7,7 +21,7 @@ export default function AsyncSelect({
   placeholder = 'Select an option',
   isLoading = false,
   required = false,
-}) {
+}: AsyncSelectProps) {
   return (
     <select
       id={id}

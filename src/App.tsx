@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Landlords from './Landlords';
 import Localities from './Localities';
 import { getLandlordDeleteBlockMessage } from './utils/landlordDeleteGuard';
+import type { Landlord, LandlordFormValues, Locality, LocalityFormValues } from './types';
 
 const routes = [
   { path: '#/landlords', label: 'Landlords', icon: '👤' },
@@ -10,8 +11,8 @@ const routes = [
 
 export default function App() {
   const [route, setRoute] = useState(window.location.hash || '#/landlords');
-  const [landlords, setLandlords] = useState([]);
-  const [localities, setLocalities] = useState([]);
+  const [landlords, setLandlords] = useState<Landlord[]>([]);
+  const [localities, setLocalities] = useState<Locality[]>([]);
 
   useEffect(() => {
     const onHashChange = () => setRoute(window.location.hash || '#/landlords');
@@ -19,13 +20,13 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  const addLandlord = (landlord) =>
+  const addLandlord = (landlord: LandlordFormValues) =>
     setLandlords((prev) => [...prev, { ...landlord, id: crypto.randomUUID() }]);
 
-  const updateLandlord = (id, landlord) =>
+  const updateLandlord = (id: string, landlord: LandlordFormValues) =>
     setLandlords((prev) => prev.map((l) => (l.id === id ? { ...l, ...landlord } : l)));
 
-  const deleteLandlord = (id) => {
+  const deleteLandlord = (id: string) => {
     const message = getLandlordDeleteBlockMessage(id, localities);
     if (message) {
       alert(message);
@@ -34,13 +35,13 @@ export default function App() {
     setLandlords((prev) => prev.filter((l) => l.id !== id));
   };
 
-  const addLocality = (locality) =>
+  const addLocality = (locality: LocalityFormValues) =>
     setLocalities((prev) => [...prev, { ...locality, id: crypto.randomUUID() }]);
 
-  const updateLocality = (id, locality) =>
+  const updateLocality = (id: string, locality: LocalityFormValues) =>
     setLocalities((prev) => prev.map((l) => (l.id === id ? { ...l, ...locality } : l)));
 
-  const deleteLocality = (id) =>
+  const deleteLocality = (id: string) =>
     setLocalities((prev) => prev.filter((l) => l.id !== id));
 
   return (

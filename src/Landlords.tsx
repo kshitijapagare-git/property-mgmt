@@ -1,22 +1,32 @@
 import { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import Modal from './Modal';
 import Pagination from './Pagination';
 import DataTable from './DataTable';
+import type { Column, Landlord, LandlordFormValues } from './types';
 
-const empty = { firstName: '', lastName: '', email: '', phone: '' };
+const empty: LandlordFormValues = { firstName: '', lastName: '', email: '', phone: '' };
 const PAGE_SIZE = 10;
 
-export default function Landlords({ landlords, onAdd, onUpdate, onDelete }) {
-  const [form, setForm] = useState(empty);
+interface LandlordsProps {
+  landlords: Landlord[];
+  onAdd: (landlord: LandlordFormValues) => void;
+  onUpdate: (id: string, landlord: LandlordFormValues) => void;
+  onDelete: (id: string) => void;
+}
+
+export default function Landlords({ landlords, onAdd, onUpdate, onDelete }: LandlordsProps) {
+  const [form, setForm] = useState<LandlordFormValues>(empty);
   const [open, setOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(landlords.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const rows = landlords.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const close = () => {
     setOpen(false);
@@ -30,7 +40,7 @@ export default function Landlords({ landlords, onAdd, onUpdate, onDelete }) {
     setOpen(true);
   };
 
-  const openEdit = (landlord) => {
+  const openEdit = (landlord: Landlord) => {
     setEditingId(landlord.id);
     setForm({
       firstName: landlord.firstName,
@@ -41,7 +51,7 @@ export default function Landlords({ landlords, onAdd, onUpdate, onDelete }) {
     setOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (editingId) {
       onUpdate(editingId, form);
@@ -51,7 +61,7 @@ export default function Landlords({ landlords, onAdd, onUpdate, onDelete }) {
     close();
   };
 
-  const columns = [
+  const columns: Column<Landlord>[] = [
     { key: 'firstName', header: 'First name' },
     { key: 'lastName', header: 'Last name' },
     { key: 'email', header: 'Email' },

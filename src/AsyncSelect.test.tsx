@@ -1,8 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
+import type { ChangeEvent } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AsyncSelect from './AsyncSelect';
+import type { SelectOption } from './types';
 
-const options = [
+const options: SelectOption[] = [
   { value: 'l1', label: 'Jane Doe' },
   { value: 'l2', label: 'John Smith' },
 ];
@@ -40,7 +42,10 @@ describe('AsyncSelect', () => {
 
   it('calls onChange with the selected option value', () => {
     // Capture target fields during the event: the controlled select resets its value right after.
-    const handleChange = vi.fn((e) => ({ name: e.target.name, value: e.target.value }));
+    const handleChange = vi.fn((e: ChangeEvent<HTMLSelectElement>) => ({
+      name: e.target.name,
+      value: e.target.value,
+    }));
     render(
       <AsyncSelect
         id="landlordId"
