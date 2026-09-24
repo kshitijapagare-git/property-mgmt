@@ -16,9 +16,37 @@ export interface Locality {
   landlordId: string;
 }
 
+export type PropertyTypeName = 'APARTMENT' | 'VILLA' | 'STUDIO' | 'PG' | 'COMMERCIAL';
+
+export interface PropertyType {
+  id: string;
+  name: PropertyTypeName;
+  /** Integer minor currency units (paise/cents), matching the API's wire type. */
+  defaultDeposit: number;
+}
+
+export type Furnishing = 'UNFURNISHED' | 'SEMI' | 'FULL';
+
+export interface Property {
+  id: string;
+  title: string;
+  localityId: string;
+  propertyTypeId: string;
+  bedrooms: number;
+  bathrooms: number;
+  carpetAreaSqft: number;
+  furnishing: Furnishing;
+  /** null means unrated; a star rating of 0 is not a valid state. */
+  conditionRating: number | null;
+  /** ISO date string. */
+  builtOn: string;
+}
+
 /** The modal form's fields — a record without the `id`, which is assigned on create. */
 export type LandlordFormValues = Omit<Landlord, 'id'>;
 export type LocalityFormValues = Omit<Locality, 'id'>;
+export type PropertyTypeFormValues = Omit<PropertyType, 'id'>;
+export type PropertyFormValues = Omit<Property, 'id'>;
 
 export interface SelectOption {
   value: string;
