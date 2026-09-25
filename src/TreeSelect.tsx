@@ -78,7 +78,19 @@ export default function TreeSelect({
 
   return (
     <div className="tree-select" id={id}>
-      <input type="hidden" name={name} value={value} required={required} onInvalid={handleSubmitBlock} />
+      {/* Not type="hidden" or readOnly: both are skipped by native validation, so `required`
+          would never block submit. Visually hidden instead, and kept out of the tab order. */}
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={() => {}}
+        required={required}
+        onInvalid={handleSubmitBlock}
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{ position: 'absolute', opacity: 0, width: 1, height: 1, pointerEvents: 'none' }}
+      />
 
       <div style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: '#374151' }}>

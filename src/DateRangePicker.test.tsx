@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import DateRangePicker from './DateRangePicker';
 
 function pickDate(cell: HTMLElement) {
@@ -23,10 +23,11 @@ describe('DateRangePicker', () => {
       </form>
     );
 
-    const button = screen.getByRole('button', { name: /select availability/i });
+    // A start date is already set, so the trigger shows it instead of "Select availability".
+    const button = screen.getByRole('button', { name: /available from: 2026-01-10/i });
     fireEvent.click(button);
 
-    const dayButtons = Array.from(container.querySelectorAll('button[aria-label]'));
+    const dayButtons = Array.from(container.querySelectorAll<HTMLButtonElement>('button[aria-label]'));
     const endCandidate = dayButtons.find((b) => b.getAttribute('aria-label') === '2026-01-05');
 
     expect(endCandidate).toBeTruthy();

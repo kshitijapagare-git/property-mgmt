@@ -1,8 +1,6 @@
+import { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-
-// jsdom doesn't fully emulate native constraint validation for hidden inputs.
-// We assert the TreeSelect surfaces required state via checkValidity() in the wrapper.
 import TreeSelect from './TreeSelect';
 import type { Locality } from './types';
 
@@ -65,7 +63,6 @@ describe('TreeSelect', () => {
     const onAdd = vi.fn();
 
     function Wrapper() {
-      const { useState } = require('react') as typeof import('react');
       const [value, setValue] = useState('');
       return (
         <form

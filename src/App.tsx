@@ -3,7 +3,7 @@ import Landlords from './Landlords';
 import Localities from './Localities';
 import PropertyTypes from './PropertyTypes';
 import Properties from './Properties';
-import Listing from './Listing';
+import Listings from './Listings';
 import { getLandlordDeleteBlockMessage } from './utils/landlordDeleteGuard';
 import type {
   Landlord,
@@ -128,7 +128,7 @@ export default function App() {
             onDelete={deleteProperty}
           />
         ) : route === '#/listings' ? (
-          <Listing
+          <Listings
             listings={listings}
             properties={properties}
             onAdd={addListing}

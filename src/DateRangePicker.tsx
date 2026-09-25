@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { FormEventHandler } from 'react';
 
 export interface DateRangePickerRange {
   from: string;
@@ -47,10 +48,6 @@ function startOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
-function endOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
-}
-
 function monthLabel(date: Date): string {
   return date.toLocaleString(undefined, { month: 'long', year: 'numeric' });
 }
@@ -65,11 +62,7 @@ function getGridStart(month: Date): Date {
 
 function getGridCells(month: Date): Date[] {
   const gridStart = getGridStart(month);
-  const end = endOfMonth(month);
-  const gridEndStart = getGridStart(end);
   // Use 6 weeks (42 cells) to keep layout stable.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ = gridEndStart;
   return Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
 }
 
@@ -81,12 +74,8 @@ export default function DateRangePicker({ id, name, from, to, onChange, min }: D
   });
 
   const [localError, setLocalError] = useState<string | null>(null);
-  const [pendingChange, setPendingChange] = useState<DateRangePickerRange | null>(null);
 
   const inputFromRef = useRef<HTMLInputElement | null>(null);
-
-  const selectedFrom = useMemo(() => isoToDate(from), [from]);
-  const selectedTo = useMemo(() => isoToDate(to), [to]);
 
   useEffect(() => {
     if (!open) return;
@@ -106,18 +95,15 @@ export default function DateRangePicker({ id, name, from, to, onChange, min }: D
     const err = validateRange(next);
     setLocalError(err);
     if (err) {
-      setPendingChange(next);
       // Don’t call onChange until a valid range is committed.
       return;
     }
-    setPendingChange(null);
     onChange(next);
   };
 
   const chooseStart = (date: Date) => {
     const nextFrom = dateToIso(date);
     const next: DateRangePickerRange = { from: nextFrom, to: to || '' };
-    setPendingChange(null);
     const err = validateRange(next);
     setLocalError(err);
     onChange(next);
@@ -142,7 +128,7 @@ export default function DateRangePicker({ id, name, from, to, onChange, min }: D
     return false;
   };
 
-  const onHiddenInputInvalid: React.InvalidEventHandler<HTMLInputElement> = () => {
+  const onHiddenInputInvalid: FormEventHandler<HTMLInputElement> = () => {
     // Ensure we show our inline error too.
     const err = validateRange({ from, to });
     setLocalError(err);
@@ -210,7 +196,6 @@ export default function DateRangePicker({ id, name, from, to, onChange, min }: D
               const isEnd = to && iso === to;
               const isBetween = from && to && compareIso(iso, from) >= 0 && compareIso(iso, to) <= 0;
 
-              const chooseIsStart = !from || (from && to);
               const canClick = !isDisabled;
 
               return (

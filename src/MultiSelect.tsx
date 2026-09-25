@@ -19,13 +19,14 @@ export default function MultiSelect({ id, name, value, onChange, options }: Mult
   };
 
   return (
-    <div id={id} name={name} onKeyDown={handleKeyDown}>
+    <div id={id} onKeyDown={handleKeyDown}>
       {options.map((opt) => {
         const checked = value.includes(opt.value);
         return (
           <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <input
               type="checkbox"
+              name={name}
               checked={checked}
               onChange={() => toggle(opt.value)}
               value={opt.value}

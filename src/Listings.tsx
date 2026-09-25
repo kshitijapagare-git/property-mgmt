@@ -36,7 +36,7 @@ const listingStatusOptions: SelectOption[] = [
   { value: 'LET', label: 'Let' },
 ];
 
-interface ListingProps {
+interface ListingsProps {
   listings: Listing[];
   properties: Property[];
   onAdd: (listing: ListingFormValues) => void;
@@ -54,7 +54,7 @@ const empty: ListingFormValues = {
   status: 'DRAFT',
 };
 
-export default function Listing({ listings, properties, onAdd, onUpdate, onDelete }: ListingProps) {
+export default function Listings({ listings, properties, onAdd, onUpdate, onDelete }: ListingsProps) {
   const [form, setForm] = useState<ListingFormValues>(empty);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
