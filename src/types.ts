@@ -13,6 +13,7 @@ export interface Locality {
   name: string;
   pincode: string;
   city: string;
+  zone: string;
   landlordId: string;
 }
 
@@ -26,6 +27,10 @@ export interface PropertyType {
 }
 
 export type Furnishing = 'UNFURNISHED' | 'SEMI' | 'FULL';
+
+export type ListingStatus = 'DRAFT' | 'LIVE' | 'UNDER_OFFER' | 'LET';
+
+export type Amenity = 'LIFT' | 'PARKING' | 'POWER_BACKUP' | 'GYM' | 'SECURITY' | 'PET_FRIENDLY';
 
 export interface Property {
   id: string;
@@ -42,11 +47,26 @@ export interface Property {
   builtOn: string;
 }
 
+export interface Listing {
+  id: string;
+  propertyId: string;
+  expectedRent: number;
+  /** ISO date string. */
+  availableFrom: string;
+  /** ISO date string. */
+  availableTo: string;
+  /** HTML string from the RichTextEditor. */
+  description: string;
+  amenities: Amenity[];
+  status: ListingStatus;
+}
+
 /** The modal form's fields — a record without the `id`, which is assigned on create. */
 export type LandlordFormValues = Omit<Landlord, 'id'>;
 export type LocalityFormValues = Omit<Locality, 'id'>;
 export type PropertyTypeFormValues = Omit<PropertyType, 'id'>;
 export type PropertyFormValues = Omit<Property, 'id'>;
+export type ListingFormValues = Omit<Listing, 'id'>;
 
 export interface SelectOption {
   value: string;

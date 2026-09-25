@@ -6,7 +6,7 @@ import DataTable from './DataTable';
 import AsyncSelect from './AsyncSelect';
 import type { Column, Landlord, Locality, LocalityFormValues, SelectOption } from './types';
 
-const empty: LocalityFormValues = { name: '', pincode: '', city: '', landlordId: '' };
+const empty: LocalityFormValues = { name: '', pincode: '', city: '', zone: '', landlordId: '' };
 const PAGE_SIZE = 10;
 
 interface LocalitiesProps {
@@ -56,6 +56,7 @@ export default function Localities({
       name: locality.name,
       pincode: locality.pincode,
       city: locality.city,
+      zone: locality.zone,
       landlordId: locality.landlordId,
     });
     setOpen(true);
@@ -136,6 +137,10 @@ export default function Localities({
           <div className="field">
             <label htmlFor="city">City</label>
             <input id="city" name="city" value={form.city} onChange={handleChange} required />
+          </div>
+          <div className="field">
+            <label htmlFor="zone">Zone</label>
+            <input id="zone" name="zone" value={form.zone} onChange={handleChange} />
           </div>
           <div className="field">
             <label htmlFor="landlordId">Landlord</label>
