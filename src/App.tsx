@@ -3,10 +3,13 @@ import Landlords from './Landlords';
 import Localities from './Localities';
 import PropertyTypes from './PropertyTypes';
 import Properties from './Properties';
+import Listing from './Listing';
 import { getLandlordDeleteBlockMessage } from './utils/landlordDeleteGuard';
 import type {
   Landlord,
   LandlordFormValues,
+  Listing,
+  ListingFormValues,
   Locality,
   LocalityFormValues,
   Property,
@@ -20,6 +23,7 @@ const routes = [
   { path: '#/localities', label: 'Localities', icon: '📍' },
   { path: '#/property-types', label: 'Property Types', icon: '🏢' },
   { path: '#/properties', label: 'Properties', icon: '🏘️' },
+  { path: '#/listings', label: 'Listings', icon: '📰' },
 ];
 
 export default function App() {
@@ -28,6 +32,7 @@ export default function App() {
   const [localities, setLocalities] = useState<Locality[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
     const onHashChange = () => setRoute(window.location.hash || '#/landlords');
@@ -77,6 +82,15 @@ export default function App() {
   const deleteProperty = (id: string) =>
     setProperties((prev) => prev.filter((p) => p.id !== id));
 
+  const addListing = (listing: ListingFormValues) =>
+    setListings((prev) => [...prev, { ...listing, id: crypto.randomUUID() }]);
+
+  const updateListing = (id: string, listing: ListingFormValues) =>
+    setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...listing } : l)));
+
+  const deleteListing = (id: string) =>
+    setListings((prev) => prev.filter((l) => l.id !== id));
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -112,6 +126,14 @@ export default function App() {
             onAdd={addProperty}
             onUpdate={updateProperty}
             onDelete={deleteProperty}
+          />
+        ) : route === '#/listings' ? (
+          <Listing
+            listings={listings}
+            properties={properties}
+            onAdd={addListing}
+            onUpdate={updateListing}
+            onDelete={deleteListing}
           />
         ) : (
           <Landlords

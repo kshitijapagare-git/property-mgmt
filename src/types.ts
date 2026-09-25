@@ -13,6 +13,7 @@ export interface Locality {
   name: string;
   pincode: string;
   city: string;
+  zone: string;
   landlordId: string;
 }
 
