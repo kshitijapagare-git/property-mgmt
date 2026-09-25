@@ -1,12 +1,20 @@
 import { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import Modal from './Modal';
 import Pagination from './Pagination';
+import type { Landlord, LandlordFormValues } from './types';
 
-const empty = { firstName: '', lastName: '', email: '', phone: '' };
+const empty: LandlordFormValues = { firstName: '', lastName: '', email: '', phone: '' };
 const PAGE_SIZE = 10;
 
-export default function Landlords({ landlords, onAdd, onDelete }) {
-  const [form, setForm] = useState(empty);
+interface LandlordsProps {
+  landlords: Landlord[];
+  onAdd: (landlord: LandlordFormValues) => void;
+  onDelete: (id: string) => void;
+}
+
+export default function Landlords({ landlords, onAdd, onDelete }: LandlordsProps) {
+  const [form, setForm] = useState<LandlordFormValues>(empty);
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -14,14 +22,15 @@ export default function Landlords({ landlords, onAdd, onDelete }) {
   const current = Math.min(page, totalPages);
   const rows = landlords.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const close = () => {
     setOpen(false);
     setForm(empty);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onAdd(form);
     close();

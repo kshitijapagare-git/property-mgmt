@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Landlords from './Landlords';
 import Localities from './Localities';
+import type { Landlord, LandlordFormValues, Locality, LocalityFormValues } from './types';
 
 const routes = [
   { path: '#/landlords', label: 'Landlords', icon: '👤' },
@@ -9,8 +10,8 @@ const routes = [
 
 export default function App() {
   const [route, setRoute] = useState(window.location.hash || '#/landlords');
-  const [landlords, setLandlords] = useState([]);
-  const [localities, setLocalities] = useState([]);
+  const [landlords, setLandlords] = useState<Landlord[]>([]);
+  const [localities, setLocalities] = useState<Locality[]>([]);
 
   useEffect(() => {
     const onHashChange = () => setRoute(window.location.hash || '#/landlords');
@@ -18,10 +19,10 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  const addLandlord = (landlord) =>
+  const addLandlord = (landlord: LandlordFormValues) =>
     setLandlords((prev) => [...prev, { ...landlord, id: crypto.randomUUID() }]);
 
-  const deleteLandlord = (id) => {
+  const deleteLandlord = (id: string) => {
     if (localities.some((l) => l.landlordId === id)) {
       alert('Cannot delete: landlord has localities.');
       return;
@@ -29,10 +30,10 @@ export default function App() {
     setLandlords((prev) => prev.filter((l) => l.id !== id));
   };
 
-  const addLocality = (locality) =>
+  const addLocality = (locality: LocalityFormValues) =>
     setLocalities((prev) => [...prev, { ...locality, id: crypto.randomUUID() }]);
 
-  const deleteLocality = (id) =>
+  const deleteLocality = (id: string) =>
     setLocalities((prev) => prev.filter((l) => l.id !== id));
 
   return (

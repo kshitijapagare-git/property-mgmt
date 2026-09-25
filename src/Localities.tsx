@@ -1,12 +1,21 @@
 import { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import Modal from './Modal';
 import Pagination from './Pagination';
+import type { Landlord, Locality, LocalityFormValues } from './types';
 
-const empty = { name: '', pincode: '', city: '', landlordId: '' };
+const empty: LocalityFormValues = { name: '', pincode: '', city: '', landlordId: '' };
 const PAGE_SIZE = 10;
 
-export default function Localities({ localities, landlords, onAdd, onDelete }) {
-  const [form, setForm] = useState(empty);
+interface LocalitiesProps {
+  localities: Locality[];
+  landlords: Landlord[];
+  onAdd: (locality: LocalityFormValues) => void;
+  onDelete: (id: string) => void;
+}
+
+export default function Localities({ localities, landlords, onAdd, onDelete }: LocalitiesProps) {
+  const [form, setForm] = useState<LocalityFormValues>(empty);
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -14,20 +23,23 @@ export default function Localities({ localities, landlords, onAdd, onDelete }) {
   const current = Math.min(page, totalPages);
   const rows = localities.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  // One handler serves the text inputs and the landlord <select>, so the event covers either
+  // element — the body only touches `name` and `value`, which both share.
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const close = () => {
     setOpen(false);
     setForm(empty);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onAdd(form);
     close();
   };
 
-  const landlordName = (id) => {
+  const landlordName = (id: string) => {
     const l = landlords.find((x) => x.id === id);
     return l ? `${l.firstName} ${l.lastName}` : '';
   };

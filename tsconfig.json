@@ -7,19 +7,19 @@
     "jsx": "react-jsx",
     "types": ["vite/client"],
 
-    /* This project is JavaScript. `allowJs` lets tsc see the .jsx sources so it has inputs at all,
-       and `checkJs` stays off so existing untyped code is not a wall of errors. Any .ts/.tsx a
-       change adds IS type-checked. */
-    "allowJs": true,
-    "checkJs": false,
-
-    /* Vite compiles each file; tsc only ever type-checks here. `--noEmit` is what the OCTIQ
-       verify gate runs, and the presence of this file is what makes the gate recognise the
-       project at all — without it every stage reports "no recognized build toolchain". */
+    /* Vite compiles each file and tsc emits nothing, so tsc is purely a type checker here.
+       `--noEmit` is also exactly what the OCTIQ verify gate runs, and this file's presence is
+       what makes the gate recognise the project at all. */
     "noEmit": true,
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": true
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "vite.config.ts", "vitest.config.ts"]
 }
