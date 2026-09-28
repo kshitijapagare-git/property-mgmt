@@ -4,6 +4,7 @@ import Localities from './Localities';
 import Property from './Property';
 import Listings from './Listings';
 import Viewings from './Viewings';
+import Tenants from './Tenants';
 import ConfirmDialog from './ConfirmDialog';
 import type {
   Landlord,
@@ -15,10 +16,12 @@ import type {
   Property as PropertyEntity,
   PropertyFormValues,
   PropertyType,
+  Tenant,
+  TenantFormValues,
   Viewing,
   ViewingFormValues,
 } from './types';
-import { seedListings, seedProperties, seedPropertyTypes, seedViewings } from './seedData';
+import { seedListings, seedProperties, seedPropertyTypes, seedTenants, seedViewings } from './seedData';
 
 const routes = [
   { path: '#/landlords', label: 'Landlords', icon: '👤' },
@@ -26,6 +29,7 @@ const routes = [
   { path: '#/properties', label: 'Properties', icon: '🏢' },
   { path: '#/listings', label: 'Listings', icon: '📋' },
   { path: '#/viewings', label: 'Viewings', icon: '📅' },
+  { path: '#/tenants', label: 'Tenants', icon: '🧑' },
 ];
 
 /**
@@ -51,6 +55,7 @@ export default function App() {
   const [listings, setListings] = useState<Listing[]>(seedListings);
   const [propertyTypes] = useState<PropertyType[]>(seedPropertyTypes);
   const [viewings, setViewings] = useState<Viewing[]>(seedViewings);
+  const [tenants, setTenants] = useState<Tenant[]>(seedTenants);
   const [confirmDeleteLandlordId, setConfirmDeleteLandlordId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -112,6 +117,15 @@ export default function App() {
   const deleteViewing = (id: string) =>
     setViewings((prev) => prev.filter((v) => v.id !== id));
 
+  const addTenant = (tenant: TenantFormValues) =>
+    setTenants((prev) => [...prev, { ...tenant, id: crypto.randomUUID() }]);
+
+  const updateTenant = (id: string, tenant: TenantFormValues) =>
+    setTenants((prev) => prev.map((t) => (t.id === id ? { ...tenant, id } : t)));
+
+  const deleteTenant = (id: string) =>
+    setTenants((prev) => prev.filter((t) => t.id !== id));
+
   const deleteLandlordGuard = confirmDeleteLandlordId
     ? getDeleteLandlordGuard(confirmDeleteLandlordId, localities)
     : null;
@@ -161,6 +175,13 @@ export default function App() {
             onAdd={addViewing}
             onUpdate={updateViewing}
             onDelete={deleteViewing}
+          />
+        ) : route === '#/tenants' ? (
+          <Tenants
+            tenants={tenants}
+            onAdd={addTenant}
+            onUpdate={updateTenant}
+            onDelete={deleteTenant}
           />
         ) : (
           <Landlords

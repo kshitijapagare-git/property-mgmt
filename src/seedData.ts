@@ -6,6 +6,7 @@ import type {
   Locality,
   Property,
   PropertyType,
+  Tenant,
   Viewing,
 } from './types';
 
@@ -110,3 +111,16 @@ export const seedViewings: Viewing[] = Array.from({ length: 15 }, (_, i) => {
     isConfirmed: i % 3 !== 0,
   };
 });
+
+/**
+ * Deterministic Tenant fixtures for manual QA against the Tenant CRUD screen: covers all four
+ * IdProofType values plus one tenant left with idProofType/idProofNumber blank, so every
+ * validation path (required-once-chosen, cleared-on-blank) has a real starting record to edit.
+ */
+export const seedTenants: Tenant[] = [
+  { id: 'tenant-1', firstName: 'Rahul', lastName: 'Verma', email: 'rahul.verma@example.com', phone: '9700000001', idProofType: 'AADHAAR', idProofNumber: '234512345678' },
+  { id: 'tenant-2', firstName: 'Sneha', lastName: 'Kulkarni', email: 'sneha.kulkarni@example.com', phone: '9700000002', idProofType: 'PAN', idProofNumber: 'ABCPK1234D' },
+  { id: 'tenant-3', firstName: 'Amit', lastName: 'Joshi', email: 'amit.joshi@example.com', phone: '9700000003', idProofType: 'PASSPORT', idProofNumber: 'P1234567' },
+  { id: 'tenant-4', firstName: 'Divya', lastName: 'Menon', email: 'divya.menon@example.com', phone: '9700000004', idProofType: 'DRIVING_LICENCE', idProofNumber: 'KA0120230012345' },
+  { id: 'tenant-5', firstName: 'Karan', lastName: 'Chopra', email: 'karan.chopra@example.com', phone: '9700000005', idProofType: '', idProofNumber: '' },
+];

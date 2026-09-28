@@ -34,10 +34,24 @@ export interface Property {
   propertyTypeId?: string;
 }
 
+/** The fixed set of ID proof documents a Tenant can be identified by. */
+export type IdProofType = 'AADHAAR' | 'PAN' | 'PASSPORT' | 'DRIVING_LICENCE';
+
+export interface Tenant {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  idProofType: IdProofType | '';
+  idProofNumber: string;
+}
+
 /** A modal form's fields — the entity without its `id`, which is assigned on create. */
 export type LandlordFormValues = Omit<Landlord, 'id'>;
 export type LocalityFormValues = Omit<Locality, 'id'>;
 export type PropertyFormValues = Omit<Property, 'id'>;
+export type TenantFormValues = Omit<Tenant, 'id'>;
 
 /** The fixed set of amenities a Listing can advertise. */
 export type Amenity = 'LIFT' | 'PARKING' | 'POWER_BACKUP' | 'GYM' | 'SECURITY' | 'PET_FRIENDLY';
