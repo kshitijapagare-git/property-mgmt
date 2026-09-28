@@ -103,3 +103,23 @@ export interface Application {
 }
 
 export type ApplicationFormValues = Omit<Application, 'id'>;
+
+export type LeaseStatus = 'DRAFT' | 'ACTIVE' | 'TERMINATED';
+
+export interface Lease {
+  id: string;
+  applicationId: string;
+  startDate: string;
+  endDate: string;
+  monthlyRent: number;
+  securityDeposit: number;
+  rentDueDay: number;
+  lockInMonths: number;
+  status: LeaseStatus;
+  /** Populated only when status is TERMINATED. */
+  terminationDate?: string;
+  /** Populated only when status is TERMINATED. */
+  terminationReason?: string;
+}
+
+export type LeaseFormValues = Omit<Lease, 'id'>;
