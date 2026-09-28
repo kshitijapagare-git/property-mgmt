@@ -15,10 +15,23 @@ export interface Locality {
   landlordId: string;
 }
 
+/**
+ * Minimal scaffold: the ticket's acceptance criteria assume a PropertyType entity/CRUD already
+ * exists (it doesn't, in this repo). Only the type and a live list are added here so the
+ * Listings `propertyTypeId` filter has real data to read — a full PropertyType management
+ * screen is out of scope for this change.
+ */
+export interface PropertyType {
+  id: string;
+  name: string;
+}
+
 export interface Property {
   id: string;
   name: string;
   localityId: string;
+  /** Optional so existing Property CRUD (which has no UI for this yet) is unaffected. */
+  propertyTypeId?: string;
 }
 
 /** A modal form's fields — the entity without its `id`, which is assigned on create. */
@@ -50,3 +63,15 @@ export interface Listing {
 }
 
 export type ListingFormValues = Omit<Listing, 'id'>;
+
+export interface Viewing {
+  id: string;
+  listingId: string;
+  prospectName: string;
+  phone: string;
+  scheduledOn: string;
+  slot: string;
+  isConfirmed: boolean;
+}
+
+export type ViewingFormValues = Omit<Viewing, 'id'>;
