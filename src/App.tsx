@@ -5,8 +5,11 @@ import Property from './Property';
 import Listings from './Listings';
 import Viewings from './Viewings';
 import Tenants from './Tenants';
+import Applications, { applyApproval } from './Applications';
 import ConfirmDialog from './ConfirmDialog';
 import type {
+  Application,
+  ApplicationFormValues,
   Landlord,
   LandlordFormValues,
   Listing,
@@ -30,6 +33,7 @@ const routes = [
   { path: '#/listings', label: 'Listings', icon: '📋' },
   { path: '#/viewings', label: 'Viewings', icon: '📅' },
   { path: '#/tenants', label: 'Tenants', icon: '🧑' },
+  { path: '#/applications', label: 'Applications', icon: '📝' },
 ];
 
 /**
@@ -56,6 +60,7 @@ export default function App() {
   const [propertyTypes] = useState<PropertyType[]>(seedPropertyTypes);
   const [viewings, setViewings] = useState<Viewing[]>(seedViewings);
   const [tenants, setTenants] = useState<Tenant[]>(seedTenants);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [confirmDeleteLandlordId, setConfirmDeleteLandlordId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -126,6 +131,25 @@ export default function App() {
   const deleteTenant = (id: string) =>
     setTenants((prev) => prev.filter((t) => t.id !== id));
 
+  const addApplication = (application: ApplicationFormValues) =>
+    setApplications((prev) => [...prev, { ...application, id: crypto.randomUUID() }]);
+
+  const updateApplication = (id: string, application: ApplicationFormValues) =>
+    setApplications((prev) => prev.map((a) => (a.id === id ? { ...application, id } : a)));
+
+  const deleteApplication = (id: string) =>
+    setApplications((prev) => prev.filter((a) => a.id !== id));
+
+  // Keeps the approve → Listing UNDER_OFFER update in one function, delegating to
+  // Applications.tsx's applyApproval so a later ticket can reuse the same pattern.
+  const approveApplication = (id: string) => {
+    const application = applications.find((a) => a.id === id);
+    if (!application) return;
+    const result = applyApproval(application, viewings, listings);
+    setApplications((prev) => prev.map((a) => (a.id === id ? result.application : a)));
+    setListings(result.listings);
+  };
+
   const deleteLandlordGuard = confirmDeleteLandlordId
     ? getDeleteLandlordGuard(confirmDeleteLandlordId, localities)
     : null;
@@ -182,6 +206,18 @@ export default function App() {
             onAdd={addTenant}
             onUpdate={updateTenant}
             onDelete={deleteTenant}
+          />
+        ) : route === '#/applications' ? (
+          <Applications
+            applications={applications}
+            viewings={viewings}
+            listings={listings}
+            properties={properties}
+            tenants={tenants}
+            onAdd={addApplication}
+            onUpdate={updateApplication}
+            onDelete={deleteApplication}
+            onApprove={approveApplication}
           />
         ) : (
           <Landlords
