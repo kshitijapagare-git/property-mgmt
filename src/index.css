@@ -99,3 +99,76 @@ tr:last-child td { border-bottom: none; }
 }
 .field input:focus, .field select:focus { outline: none; border-color: #6d28d9; box-shadow: 0 0 0 1px #6d28d9; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+
+/* CurrencyInput */
+.currency-input {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.currency-input .currency-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 600;
+  border-right: 1px solid #d1d5db;
+}
+.currency-input input {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+}
+.currency-input input:focus { outline: none; box-shadow: none; }
+
+/* DateRangePicker */
+.date-range-inputs { display: flex; align-items: center; gap: 10px; }
+.date-range-inputs input { flex: 1; }
+.date-range-sep { color: #6b7280; font-size: 13px; }
+.date-range-error { color: #b91c1c; font-size: 13px; margin-top: 6px; }
+
+/* RichTextEditor */
+.rte { border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; }
+.rte-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+.rte-toolbar button {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.rte-surface {
+  min-height: 120px;
+  padding: 11px 14px;
+  font-size: 15px;
+  outline: none;
+}
+.rte-surface:focus { box-shadow: inset 0 0 0 1px #6d28d9; }
+
+/* MultiSelect */
+.multiselect { display: flex; flex-wrap: wrap; gap: 8px; }
+.multiselect-option {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  font-size: 14px;
+}
+.multiselect-option.selected {
+  background: #6d28d9;
+  color: #fff;
+  border-color: #6d28d9;
+  font-weight: 600;
+}

@@ -4,7 +4,7 @@ import Modal from './Modal';
 import Pagination from './Pagination';
 import type { Landlord, Locality, LocalityFormValues } from './types';
 
-const empty: LocalityFormValues = { name: '', pincode: '', city: '', landlordId: '' };
+const empty: LocalityFormValues = { name: '', pincode: '', city: '', zone: '', landlordId: '' };
 const PAGE_SIZE = 10;
 
 interface LocalitiesProps {
@@ -93,6 +93,10 @@ export default function Localities({ localities, landlords, onAdd, onDelete }: L
           <div className="field">
             <label htmlFor="city">City</label>
             <input id="city" name="city" value={form.city} onChange={handleChange} required />
+          </div>
+          <div className="field">
+            <label htmlFor="zone">Zone</label>
+            <input id="zone" name="zone" value={form.zone} onChange={handleChange} required />
           </div>
           <div className="field">
             <label htmlFor="landlordId">Landlord</label>
