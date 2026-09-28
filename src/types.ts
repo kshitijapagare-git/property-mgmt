@@ -123,3 +123,33 @@ export interface Lease {
 }
 
 export type LeaseFormValues = Omit<Lease, 'id'>;
+
+/** The fixed set of categories a MaintenanceRequest can be classified under. */
+export type MaintenanceCategory = 'PLUMBING' | 'ELECTRICAL' | 'APPLIANCE' | 'STRUCTURAL' | 'OTHER';
+
+/** The fixed set of priority levels a MaintenanceRequest can be assigned. */
+export type MaintenancePriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+
+/** The fixed set of statuses a MaintenanceRequest can be in — also the Kanban board's columns. */
+export type MaintenanceStatus = 'OPEN' | 'IN_PROGRESS' | 'ON_HOLD' | 'RESOLVED';
+
+/** Who a resolved MaintenanceRequest's cost is charged to. Billing TENANT charges is PRC-219's concern. */
+export type ChargeTo = 'OWNER' | 'TENANT';
+
+export interface MaintenanceRequest {
+  id: string;
+  leaseId: string;
+  title: string;
+  category: MaintenanceCategory;
+  priority: MaintenancePriority;
+  description: DescriptionHtml;
+  reportedOn: string;
+  status: MaintenanceStatus;
+  /** Populated only once status is RESOLVED. */
+  resolvedOn?: string;
+  /** Populated only once status is RESOLVED. */
+  cost?: number;
+  chargeTo: ChargeTo;
+}
+
+export type MaintenanceFormValues = Omit<MaintenanceRequest, 'id'>;

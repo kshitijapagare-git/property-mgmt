@@ -6,16 +6,22 @@ import Listings from './Listings';
 import Viewings from './Viewings';
 import Tenants from './Tenants';
 import Applications, { applyApproval } from './Applications';
+import MaintenanceRequests from './MaintenanceRequests';
 import ConfirmDialog from './ConfirmDialog';
+import { applyStatusChange } from './maintenanceLogic';
 import type {
   Application,
   ApplicationFormValues,
   Landlord,
   LandlordFormValues,
+  Lease,
   Listing,
   ListingFormValues,
   Locality,
   LocalityFormValues,
+  MaintenanceFormValues,
+  MaintenanceRequest,
+  MaintenanceStatus,
   Property as PropertyEntity,
   PropertyFormValues,
   PropertyType,
@@ -24,7 +30,7 @@ import type {
   Viewing,
   ViewingFormValues,
 } from './types';
-import { seedListings, seedProperties, seedPropertyTypes, seedTenants, seedViewings } from './seedData';
+import { seedLeases, seedListings, seedMaintenanceRequests, seedProperties, seedPropertyTypes, seedTenants, seedViewings } from './seedData';
 
 const routes = [
   { path: '#/landlords', label: 'Landlords', icon: '👤' },
@@ -34,6 +40,7 @@ const routes = [
   { path: '#/viewings', label: 'Viewings', icon: '📅' },
   { path: '#/tenants', label: 'Tenants', icon: '🧑' },
   { path: '#/applications', label: 'Applications', icon: '📝' },
+  { path: '#/maintenance', label: 'Maintenance', icon: '🔧' },
 ];
 
 /**
@@ -61,6 +68,8 @@ export default function App() {
   const [viewings, setViewings] = useState<Viewing[]>(seedViewings);
   const [tenants, setTenants] = useState<Tenant[]>(seedTenants);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [leases] = useState<Lease[]>(seedLeases);
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>(seedMaintenanceRequests);
   const [confirmDeleteLandlordId, setConfirmDeleteLandlordId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -150,6 +159,30 @@ export default function App() {
     setListings(result.listings);
   };
 
+  const addMaintenanceRequest = (request: MaintenanceFormValues) =>
+    setMaintenanceRequests((prev) => [...prev, { ...request, id: crypto.randomUUID() }]);
+
+  const updateMaintenanceRequest = (id: string, request: MaintenanceFormValues) =>
+    setMaintenanceRequests((prev) => prev.map((r) => (r.id === id ? { ...request, id } : r)));
+
+  const deleteMaintenanceRequest = (id: string) =>
+    setMaintenanceRequests((prev) => prev.filter((r) => r.id !== id));
+
+  // Single commit point for a status change originating from either the Kanban board's drag
+  // handler/keyboard-alternative select or the create/edit form, delegating to
+  // maintenanceLogic.applyStatusChange so the RESOLVED gate can never be bypassed either way.
+  const changeMaintenanceStatus = (
+    id: string,
+    nextStatus: MaintenanceStatus,
+    resolution?: { resolvedOn: string; cost: number }
+  ) => {
+    const request = maintenanceRequests.find((r) => r.id === id);
+    if (!request) return;
+    const result = applyStatusChange(request, nextStatus, resolution);
+    if (!result.ok) return;
+    setMaintenanceRequests((prev) => prev.map((r) => (r.id === id ? result.request : r)));
+  };
+
   const deleteLandlordGuard = confirmDeleteLandlordId
     ? getDeleteLandlordGuard(confirmDeleteLandlordId, localities)
     : null;
@@ -218,6 +251,15 @@ export default function App() {
             onUpdate={updateApplication}
             onDelete={deleteApplication}
             onApprove={approveApplication}
+          />
+        ) : route === '#/maintenance' ? (
+          <MaintenanceRequests
+            requests={maintenanceRequests}
+            leases={leases}
+            onAdd={addMaintenanceRequest}
+            onUpdate={updateMaintenanceRequest}
+            onDelete={deleteMaintenanceRequest}
+            onStatusChange={changeMaintenanceStatus}
           />
         ) : (
           <Landlords

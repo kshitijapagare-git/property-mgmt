@@ -1,9 +1,11 @@
 import type {
   Amenity,
   Landlord,
+  Lease,
   Listing,
   ListingStatus,
   Locality,
+  MaintenanceRequest,
   Property,
   PropertyType,
   Tenant,
@@ -123,4 +125,104 @@ export const seedTenants: Tenant[] = [
   { id: 'tenant-3', firstName: 'Amit', lastName: 'Joshi', email: 'amit.joshi@example.com', phone: '9700000003', idProofType: 'PASSPORT', idProofNumber: 'P1234567' },
   { id: 'tenant-4', firstName: 'Divya', lastName: 'Menon', email: 'divya.menon@example.com', phone: '9700000004', idProofType: 'DRIVING_LICENCE', idProofNumber: 'KA0120230012345' },
   { id: 'tenant-5', firstName: 'Karan', lastName: 'Chopra', email: 'karan.chopra@example.com', phone: '9700000005', idProofType: '', idProofNumber: '' },
+];
+
+/**
+ * Minimal Lease scaffold: PRC-217's own Lease CRUD screen was not found anywhere in this repo
+ * (no Leases.tsx, no leases state in App.tsx), so this ticket cannot rely on real Lease records
+ * produced by that screen. These fixtures exist only so the MaintenanceRequest form's leaseId
+ * combobox (sourced from ACTIVE leases only, per getActiveLeaseOptions) has real data to read.
+ * applicationId values are placeholder strings — no live Application seed exists to reference,
+ * and this is scaffold data only, not part of a Lease CRUD deliverable.
+ */
+export const seedLeases: Lease[] = [
+  {
+    id: 'lease-1',
+    applicationId: 'application-placeholder-1',
+    startDate: '2024-01-01',
+    endDate: '2025-01-01',
+    monthlyRent: 32000,
+    securityDeposit: 64000,
+    rentDueDay: 5,
+    lockInMonths: 6,
+    status: 'ACTIVE',
+  },
+  {
+    id: 'lease-2',
+    applicationId: 'application-placeholder-2',
+    startDate: '2024-03-01',
+    endDate: '2025-03-01',
+    monthlyRent: 45000,
+    securityDeposit: 90000,
+    rentDueDay: 1,
+    lockInMonths: 12,
+    status: 'ACTIVE',
+  },
+  {
+    id: 'lease-3',
+    applicationId: 'application-placeholder-3',
+    startDate: '2024-06-01',
+    endDate: '2025-06-01',
+    monthlyRent: 28000,
+    securityDeposit: 56000,
+    rentDueDay: 10,
+    lockInMonths: 6,
+    status: 'DRAFT',
+  },
+  {
+    id: 'lease-4',
+    applicationId: 'application-placeholder-4',
+    startDate: '2022-01-01',
+    endDate: '2023-01-01',
+    monthlyRent: 22000,
+    securityDeposit: 44000,
+    rentDueDay: 5,
+    lockInMonths: 6,
+    status: 'TERMINATED',
+    terminationDate: '2022-11-15',
+    terminationReason: 'Tenant relocated',
+  },
+];
+
+/**
+ * Sample MaintenanceRequest fixtures so the Kanban board/table view and the URGENT/24h
+ * highlight have real data to demo against out of the box. leaseId values reference the ACTIVE
+ * seedLeases entries above, per getActiveLeaseOptions's ACTIVE-only sourcing rule.
+ */
+export const seedMaintenanceRequests: MaintenanceRequest[] = [
+  {
+    id: 'maintenance-1',
+    leaseId: 'lease-1',
+    title: 'Leaking kitchen tap',
+    category: 'PLUMBING',
+    priority: 'HIGH',
+    description: '<p>Tap has been dripping for two days.</p>',
+    reportedOn: '2024-06-01T09:00:00.000Z',
+    status: 'OPEN',
+    chargeTo: 'OWNER',
+  },
+  {
+    id: 'maintenance-2',
+    leaseId: 'lease-2',
+    title: 'Power socket not working',
+    category: 'ELECTRICAL',
+    priority: 'URGENT',
+    description: '<p>Living room socket sparked and stopped working.</p>',
+    reportedOn: '2024-05-20T09:00:00.000Z',
+    status: 'IN_PROGRESS',
+    chargeTo: 'OWNER',
+  },
+  {
+    id: 'maintenance-3',
+    leaseId: 'lease-1',
+    title: 'Refrigerator servicing',
+    category: 'APPLIANCE',
+    priority: 'LOW',
+    description: '<p>Annual maintenance check requested by tenant.</p>',
+    reportedOn: '2024-06-10T09:00:00.000Z',
+    status: 'RESOLVED',
+    resolvedOn: '2024-06-15',
+    cost: 1500,
+    chargeTo: 'TENANT',
+  },
 ];
