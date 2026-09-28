@@ -3,6 +3,8 @@ import Landlords from './Landlords';
 import Localities from './Localities';
 import Property from './Property';
 import Listings from './Listings';
+import Viewings from './Viewings';
+import ConfirmDialog from './ConfirmDialog';
 import type {
   Landlord,
   LandlordFormValues,
@@ -10,27 +12,49 @@ import type {
   ListingFormValues,
   Locality,
   LocalityFormValues,
-  Property as PropertyType,
+  Property as PropertyEntity,
   PropertyFormValues,
+  PropertyType,
+  Viewing,
+  ViewingFormValues,
 } from './types';
+import { seedListings, seedProperties, seedPropertyTypes, seedViewings } from './seedData';
 
 const routes = [
   { path: '#/landlords', label: 'Landlords', icon: '👤' },
   { path: '#/localities', label: 'Localities', icon: '📍' },
   { path: '#/properties', label: 'Properties', icon: '🏢' },
   { path: '#/listings', label: 'Listings', icon: '📋' },
+  { path: '#/viewings', label: 'Viewings', icon: '📅' },
 ];
 
+/**
+ * Pure delete-guard logic for a Landlord: whether deletion should be blocked, and the exact
+ * message to show, given how many Localities currently reference that landlord. Exported so it
+ * can be unit-tested directly (see Landlords.test.tsx) without depending on the ConfirmDialog's
+ * rendered markup.
+ */
+export function getDeleteLandlordGuard(landlordId: string, localities: Locality[]): { disabled: boolean; message: string } {
+  const count = localities.filter((l) => l.landlordId === landlordId).length;
+  if (count === 0) {
+    return { disabled: false, message: 'Are you sure you want to delete this landlord?' };
+  }
+  return { disabled: true, message: `Cannot delete: ${count} ${count === 1 ? 'locality' : 'localities'}` };
+}
+
 export default function App() {
-  const [route, setRoute] = useState(window.location.hash || '#/landlords');
+  const [route, setRoute] = useState(window.location.hash || '#/listings');
   const [landlords, setLandlords] = useState<Landlord[]>([]);
   const [localities, setLocalities] = useState<Locality[]>([]);
-  const [properties, setProperties] = useState<PropertyType[]>([]);
+  const [properties, setProperties] = useState<PropertyEntity[]>(seedProperties);
   const [propertiesLoading] = useState(false);
-  const [listings, setListings] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<Listing[]>(seedListings);
+  const [propertyTypes] = useState<PropertyType[]>(seedPropertyTypes);
+  const [viewings, setViewings] = useState<Viewing[]>(seedViewings);
+  const [confirmDeleteLandlordId, setConfirmDeleteLandlordId] = useState<string | null>(null);
 
   useEffect(() => {
-    const onHashChange = () => setRoute(window.location.hash || '#/landlords');
+    const onHashChange = () => setRoute(window.location.hash || '#/listings');
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
@@ -38,16 +62,28 @@ export default function App() {
   const addLandlord = (landlord: LandlordFormValues) =>
     setLandlords((prev) => [...prev, { ...landlord, id: crypto.randomUUID() }]);
 
-  const deleteLandlord = (id: string) => {
-    if (localities.some((l) => l.landlordId === id)) {
-      alert('Cannot delete: landlord has localities.');
-      return;
-    }
-    setLandlords((prev) => prev.filter((l) => l.id !== id));
+  const updateLandlord = (id: string, landlord: LandlordFormValues) =>
+    setLandlords((prev) => prev.map((l) => (l.id === id ? { ...landlord, id } : l)));
+
+  // Opens the blocking ConfirmDialog instead of deleting outright; the dialog itself disables
+  // its confirm action (via getDeleteLandlordGuard) when the landlord still has localities.
+  const requestDeleteLandlord = (id: string) => setConfirmDeleteLandlordId(id);
+
+  const cancelDeleteLandlord = () => setConfirmDeleteLandlordId(null);
+
+  const confirmDeleteLandlord = () => {
+    if (!confirmDeleteLandlordId) return;
+    const guard = getDeleteLandlordGuard(confirmDeleteLandlordId, localities);
+    if (guard.disabled) return;
+    setLandlords((prev) => prev.filter((l) => l.id !== confirmDeleteLandlordId));
+    setConfirmDeleteLandlordId(null);
   };
 
   const addLocality = (locality: LocalityFormValues) =>
     setLocalities((prev) => [...prev, { ...locality, id: crypto.randomUUID() }]);
+
+  const updateLocality = (id: string, locality: LocalityFormValues) =>
+    setLocalities((prev) => prev.map((l) => (l.id === id ? { ...locality, id } : l)));
 
   const deleteLocality = (id: string) =>
     setLocalities((prev) => prev.filter((l) => l.id !== id));
@@ -67,6 +103,19 @@ export default function App() {
   const deleteListing = (id: string) =>
     setListings((prev) => prev.filter((l) => l.id !== id));
 
+  const addViewing = (viewing: ViewingFormValues) =>
+    setViewings((prev) => [...prev, { ...viewing, id: crypto.randomUUID() }]);
+
+  const updateViewing = (id: string, viewing: ViewingFormValues) =>
+    setViewings((prev) => prev.map((v) => (v.id === id ? { ...viewing, id } : v)));
+
+  const deleteViewing = (id: string) =>
+    setViewings((prev) => prev.filter((v) => v.id !== id));
+
+  const deleteLandlordGuard = confirmDeleteLandlordId
+    ? getDeleteLandlordGuard(confirmDeleteLandlordId, localities)
+    : null;
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -84,6 +133,7 @@ export default function App() {
             localities={localities}
             landlords={landlords}
             onAdd={addLocality}
+            onUpdate={updateLocality}
             onDelete={deleteLocality}
           />
         ) : route === '#/properties' ? (
@@ -97,15 +147,41 @@ export default function App() {
           <Listings
             listings={listings}
             properties={properties}
+            propertyTypes={propertyTypes}
             propertiesLoading={propertiesLoading}
             onAdd={addListing}
             onUpdate={updateListing}
             onDelete={deleteListing}
           />
+        ) : route === '#/viewings' ? (
+          <Viewings
+            viewings={viewings}
+            listings={listings}
+            properties={properties}
+            onAdd={addViewing}
+            onUpdate={updateViewing}
+            onDelete={deleteViewing}
+          />
         ) : (
-          <Landlords landlords={landlords} onAdd={addLandlord} onDelete={deleteLandlord} />
+          <Landlords
+            landlords={landlords}
+            onAdd={addLandlord}
+            onUpdate={updateLandlord}
+            onDelete={requestDeleteLandlord}
+          />
         )}
       </main>
+
+      {confirmDeleteLandlordId && deleteLandlordGuard && (
+        <ConfirmDialog
+          title="Delete landlord"
+          message={deleteLandlordGuard.message}
+          confirmDisabled={deleteLandlordGuard.disabled}
+          confirmLabel="Delete"
+          onConfirm={confirmDeleteLandlord}
+          onCancel={cancelDeleteLandlord}
+        />
+      )}
     </div>
   );
 }
