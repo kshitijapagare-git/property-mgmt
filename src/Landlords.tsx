@@ -2,21 +2,32 @@ import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import Modal from './Modal';
 import Pagination from './Pagination';
+import DataTable from './DataTable';
+import type { DataTableColumn } from './DataTable';
+import FormField from './FormField';
 import type { Landlord, LandlordFormValues } from './types';
 
 const empty: LandlordFormValues = { firstName: '', lastName: '', email: '', phone: '' };
 const PAGE_SIZE = 10;
 
+// Established here per the plan so Locality (and later tickets) validate email the same way.
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const validateEmail = (value: string) => (EMAIL_REGEX.test(value) ? undefined : 'Enter a valid email address.');
+
 interface LandlordsProps {
   landlords: Landlord[];
   onAdd: (landlord: LandlordFormValues) => void;
+  onUpdate: (id: string, landlord: LandlordFormValues) => void;
   onDelete: (id: string) => void;
 }
 
-export default function Landlords({ landlords, onAdd, onDelete }: LandlordsProps) {
+export default function Landlords({ landlords, onAdd, onUpdate, onDelete }: LandlordsProps) {
   const [form, setForm] = useState<LandlordFormValues>(empty);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewingLandlord, setViewingLandlord] = useState<Landlord | null>(null);
   const [page, setPage] = useState(1);
+  const [emailError, setEmailError] = useState<string | undefined>(undefined);
 
   const totalPages = Math.max(1, Math.ceil(landlords.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
@@ -25,70 +36,120 @@ export default function Landlords({ landlords, onAdd, onDelete }: LandlordsProps
   const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  const handleEmailBlur = () => setEmailError(validateEmail(form.email));
+
   const close = () => {
     setOpen(false);
+    setEditingId(null);
     setForm(empty);
+    setEmailError(undefined);
   };
+
+  const openCreate = () => {
+    setForm(empty);
+    setEditingId(null);
+    setEmailError(undefined);
+    setOpen(true);
+  };
+
+  const openEdit = (landlord: Landlord) => {
+    const { id, ...values } = landlord;
+    setForm(values);
+    setEditingId(id);
+    setEmailError(undefined);
+    setOpen(true);
+  };
+
+  const openView = (landlord: Landlord) => setViewingLandlord(landlord);
+  const closeView = () => setViewingLandlord(null);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onAdd(form);
+    const error = validateEmail(form.email);
+    setEmailError(error);
+    if (error) return;
+    if (editingId) {
+      onUpdate(editingId, form);
+    } else {
+      onAdd(form);
+    }
     close();
   };
+
+  const columns: DataTableColumn<Landlord>[] = [
+    { key: 'firstName', header: 'First name', render: (l) => l.firstName },
+    { key: 'lastName', header: 'Last name', render: (l) => l.lastName },
+    { key: 'email', header: 'Email', render: (l) => l.email },
+    { key: 'phone', header: 'Phone', render: (l) => l.phone },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (l) => (
+        <>
+          <button className="btn btn-secondary" onClick={() => openView(l)}>View</button>{' '}
+          <button className="btn btn-secondary" onClick={() => openEdit(l)}>Edit</button>{' '}
+          <button className="btn btn-danger" onClick={() => onDelete(l.id)}>Delete</button>
+        </>
+      ),
+    },
+  ];
 
   return (
     <>
       <div className="page-header">
         <h1>Landlords</h1>
-        <button className="btn btn-primary" onClick={() => setOpen(true)}>+ Add landlord</button>
+        <button className="btn btn-primary" onClick={openCreate}>+ Add landlord</button>
       </div>
-      <div className="card">
-        <table>
-          <thead>
-            <tr>
-              <th>First name</th>
-              <th>Last name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr><td colSpan={5} className="empty">No landlords yet.</td></tr>
-            ) : (
-              rows.map((l) => (
-                <tr key={l.id}>
-                  <td>{l.firstName}</td>
-                  <td>{l.lastName}</td>
-                  <td>{l.email}</td>
-                  <td>{l.phone}</td>
-                  <td><button className="btn btn-danger" onClick={() => onDelete(l.id)}>Delete</button></td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable columns={columns} rows={rows} emptyMessage="No landlords yet." />
       <Pagination page={current} totalPages={totalPages} onChange={setPage} />
 
       {open && (
-        <Modal title="New landlord" submitLabel="Add landlord" onClose={close} onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="firstName">First name</label>
+        <Modal
+          title={editingId ? 'Edit landlord' : 'New landlord'}
+          submitLabel={editingId ? 'Save landlord' : 'Add landlord'}
+          onClose={close}
+          onSubmit={handleSubmit}
+        >
+          <FormField label="First name" htmlFor="firstName">
             <input id="firstName" name="firstName" value={form.firstName} onChange={handleChange} required />
-          </div>
-          <div className="field">
-            <label htmlFor="lastName">Last name</label>
+          </FormField>
+          <FormField label="Last name" htmlFor="lastName">
             <input id="lastName" name="lastName" value={form.lastName} onChange={handleChange} required />
-          </div>
-          <div className="field">
-            <label htmlFor="email">Email</label>
-            <input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
-          </div>
-          <div className="field">
-            <label htmlFor="phone">Phone</label>
+          </FormField>
+          <FormField label="Email" htmlFor="email" error={emailError}>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              onBlur={handleEmailBlur}
+              required
+            />
+          </FormField>
+          <FormField label="Phone" htmlFor="phone">
             <input id="phone" name="phone" value={form.phone} onChange={handleChange} required />
+          </FormField>
+        </Modal>
+      )}
+
+      {viewingLandlord && (
+        <Modal title="View landlord" submitLabel="" onClose={closeView} onSubmit={(e) => e.preventDefault()} readOnly>
+          <div className="field">
+            <label htmlFor="view-firstName">First name</label>
+            <input id="view-firstName" name="firstName" value={viewingLandlord.firstName} readOnly />
+          </div>
+          <div className="field">
+            <label htmlFor="view-lastName">Last name</label>
+            <input id="view-lastName" name="lastName" value={viewingLandlord.lastName} readOnly />
+          </div>
+          <div className="field">
+            <label htmlFor="view-email">Email</label>
+            <input id="view-email" name="email" value={viewingLandlord.email} readOnly />
+          </div>
+          <div className="field">
+            <label htmlFor="view-phone">Phone</label>
+            <input id="view-phone" name="phone" value={viewingLandlord.phone} readOnly />
           </div>
         </Modal>
       )}
