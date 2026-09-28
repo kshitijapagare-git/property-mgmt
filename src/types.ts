@@ -89,3 +89,17 @@ export interface Viewing {
 }
 
 export type ViewingFormValues = Omit<Viewing, 'id'>;
+
+export type ApplicationStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+
+export interface Application {
+  id: string;
+  viewingId: string;
+  tenantId: string;
+  offeredRent: number;
+  moveInDate: string;
+  notes: string;
+  status: ApplicationStatus;
+}
+
+export type ApplicationFormValues = Omit<Application, 'id'>;
