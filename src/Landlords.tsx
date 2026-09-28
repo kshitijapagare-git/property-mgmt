@@ -5,14 +5,11 @@ import Pagination from './Pagination';
 import DataTable from './DataTable';
 import type { DataTableColumn } from './DataTable';
 import FormField from './FormField';
+import { validateEmail } from './validation/email';
 import type { Landlord, LandlordFormValues } from './types';
 
 const empty: LandlordFormValues = { firstName: '', lastName: '', email: '', phone: '' };
 const PAGE_SIZE = 10;
-
-// Established here per the plan so Locality (and later tickets) validate email the same way.
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const validateEmail = (value: string) => (EMAIL_REGEX.test(value) ? undefined : 'Enter a valid email address.');
 
 interface LandlordsProps {
   landlords: Landlord[];
